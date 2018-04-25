@@ -1,6 +1,6 @@
 {
   "name": "esgetfamily",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "returns combined result for parent and child upto version Elasticsearch 5.6 and less",
   "main": "index.js",
   "scripts": {
@@ -26,9 +26,11 @@
     "parent child single result"
   ],
   "dependencies": {
-    "bluebird": "^3.5.1",
     "elasticsearch": "^14.2.2",
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.5"
+  },
+  "devDependencies":{
+    "bluebird": "^3.5.1",
     "mocha": "^5.1.1"
   }
 }
