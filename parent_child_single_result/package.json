@@ -9,10 +9,10 @@
   "author": "Ananya Goel <goelananya2@gmail.com> (http://sagetechie.xyz/)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/plotlabs/esgetfamily/blob/nodejs-es/README.md"
+    "url": "https://github.com/plotlabs/esgetfamily-node"
   },
   "license": "MIT",
-  "homepage": "https://github.com/plotlabs/esgetfamily/blob/nodejs-es/README.md",
+  "homepage": "https://github.com/plotlabs/esgetfamily-node/blob/master/README.md",
   "keywords": [
     "elasticsearch",
     "elastic-search",
