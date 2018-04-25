@@ -1,0 +1,32 @@
+{
+  "name": "esgetfamily",
+  "version": "1.0.0",
+  "description": "returns combined result for parent and child upto version Elasticsearch 5.6 and less",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ananya Goel <goelananya2@gmail.com> (http://sagetechie.xyz/)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/plotlabs/esgetfamily/blob/nodejs-es/README.md"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/plotlabs/esgetfamily/blob/nodejs-es/README.md",
+  "keywords": [
+    "elasticsearch",
+    "elastic-search",
+    "parent_child_single_result",
+    "es combined result",
+    "join type result",
+    "parent child",
+    "elastic search parent child",
+    "join type result",
+    "parent child",
+    "parent child single result"
+  ],
+  "dependencies": {
+    "elasticsearch": "^14.2.2",
+    "lodash": "^4.17.5"
+  }
+}
