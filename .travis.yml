@@ -3,5 +3,9 @@ node_js:
   - "8.9.0"
 install:
   - npm install
+services:
+  - elasticsearch
+before_script:
+  - sleep 15
 script:
   - npm test
