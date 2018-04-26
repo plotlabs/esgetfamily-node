@@ -96,6 +96,7 @@ it('should return parent child result', function () {
                  console.error(error);
             }
             else{
+                console.dir(result2[0].children)
                 return result2
             }
 
