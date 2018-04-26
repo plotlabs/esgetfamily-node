@@ -4,7 +4,6 @@ The following library helps you get a unified result with parents having result 
 
 # Installation
 
-StackEdit stores your files in your browser, which means all your files are automatically saved locally and are accessible **offline!**
 >`npm install esgetfamily --save`
 `npm install esgetfamily`
 
@@ -33,18 +32,14 @@ function ( error,result) {
 The function takes following arguments and in the following order
 esgetfamily(< URL >,< connection parameters>,< data >,< filter >, function(error, result){
 ...})`
->< URL >: Mention the URL of either localhost or remote server
-> < connection parameters >: The argument has three parts 1)
-	> { index: "name of the index",
-	parent_type: "name of the parent type",
-	children_type: "name of the children type"
-	}
-> < data >: pass any data array of parent object/objects. '_id' in each object is essential for it to parse it's child
-> < filter >: you can pass any valid query object for eg.
-	> [{match: {
-	  "employee_name":"employee 1"
-		}}]
-> < callback >: simple callback function with error as first argument
+
+ - < URL >: Mention the URL of either localhost or remote server
+ -  < connection parameters >: The argument has three parts 1)
+ { index: "name of the index", 	parent_type: "name of the parent type", 	children_type: "name of the children type" 	}
+ - < data >: pass any data array of parent object/objects. '_id' in each object is essential for it to parse it's child
+ - < filter >: you can pass any valid query object for eg.
+   	 [{match: {   	  "employee_name":"employee 1"    		}}]
+  - < callback >: simple callback function with error as first argument
 
 ## Result
 The result are in the form:
