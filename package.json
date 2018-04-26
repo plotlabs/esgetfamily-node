@@ -1,6 +1,6 @@
 {
   "name": "esgetfamily",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "returns combined result for parent and child upto version Elasticsearch 5.6 and less",
   "main": "index.js",
   "scripts": {
