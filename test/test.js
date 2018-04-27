@@ -1,114 +1,199 @@
 /**
- * Created by ananyagoel on 25/04/18.
+ *
+ *
+ * @Author: Ananya Goel
+ * @Organisation: PlotLabs Technologies
+ * @Website: https://www.plotlabs.io/
+ * @License: The MIT License (MIT)
+ *
+ *
  */
 
-var elasticsearch = require('elasticsearch');
-var client = new elasticsearch.Client();
-var _ = require('lodash');
-var BPromise = require('bluebird');
-var esgetfamily = require('../lib/elastic-parentchild');
+const elasticsearch = require('elasticsearch');
+const client = new elasticsearch.Client();
+const _ = require('lodash');
+const BPromise = require('bluebird');
+const esgetfamily = require('../lib/elastic-parentchild');
+const indexName = 'es-getfamilytest';
+const host = 'http://localhost:9200';
 
+/**
+ *
+ * Type: Object.
+ * Defines parent document params.
+ *
+ */
+const parent = {
+  properties: {
+    id: { type: 'integer' },
+    name: { type: 'text' },
+    age: { type: 'integer' }
+  }
+};
 
-describe('creating indexes',function () {
-    beforeEach(function () {
-        // this.timeout(10000);
-        return client.indices.create({
-            index: 'es-getfamilytest',
-            body: {
-                mappings: {
-                    "par3": {
-                        "properties": {
-                            "id": {"type": "integer"},
-                            "name": {"type": "text"},
-                            "age": {"type": "integer"}
-                        }
-                    },
-                    "child": {
-                        "_parent": {
-                            "type": "par3"
+/**
+ *
+ * Type: Object.
+ * Defiles child document params.
+ *
+ */
+const child = {
+  _parent: {
+    type: 'parent'
+  },
+  properties: {
+    id: { type: 'integer' },
+    name: { type: 'text' }
+  }
+};
 
-                        },
-                        "properties": {
-                            "id": {"type": "integer"},
-                            "name": {"type": "text"}
-                        }
-                    }
-                }
-            }
-        }).then(function () {
-                return client.index({
-                    index: "es-getfamilytest",
-                    type: "par3",
-                    id:1,
-                    body:{
-                        id:1,
-                        age:23,
-                        name: "Plotlabs"
-                    }
-                }).then(function () {
-                    return BPromise.map(_.range(0,8),function (number) {
-                        return client.index({
-                            index: "es-getfamilytest",
-                            type: "child",
-                            parent: 1,
-                            id:number,
-                            body:{
-                                id: number,
-                                name: "employee"+ number
-                            }
-                        }).then(function () {
-                            return client.indices.refresh({
-                                index: 'es-getfamilytest'
-                            })
-                        })
-                    })
-                })
+/**
+ *
+ * Type: Object.
+ * Defiles index params.
+ *
+ */
+const esIndex = {
+  index: indexName,
+  body: {
+    mappings: {
+      parent: parent,
+      child: child
+    }
+  }
+};
 
-            })
-        // })
+/**
+ *
+ * Type: Function.
+ * Refreshes the index.
+ *
+ */
+const refreshIndex = function() {
+  return client.indices.refresh({
+    index: indexName
+  });
+};
 
-    })
+/**
+ *
+ * Type: Function.
+ * Accepts: Id, Type, Parent Id.
+ * Returns a dummy document.
+ *
+ */
+const dummyData = function(id, type, parent) {
+  let object = {
+    index: indexName,
+    type: type,
+    id: id,
+    body: { id: id, age: 23, name: 'Plotlabs' + id }
+  };
+  if (parent) {
+    object.parent = parent;
+  }
+  return object;
+};
 
-
-
-
-it('should return parent child result', function () {
-
-    return client.search({
-        index: 'es-getfamilytest',
-        type: 'par3',
-        body:{
-            query: {
-                bool: {
-                    must: {
-                        match: {
-                            id: 1
-                        }
-                    }
-                }
-            }
-        }
-    }).then(function (result) {
-
-            esgetfamily('http://localhost:9200',{index:'es-getfamilytest', parent_type:'par3',child_type:'child'},result.hits.hits,[],function ( error,result2) {
-            if(error){
-
-                 console.error(error);
-            }
-            else{
-                console.dir(result2[0].children)
-                return result2
-            }
-
-            } )
-
-    })
-});
-
-    after(function () {
-        return client.indices.delete({
-            index: 'es-getfamilytest'
-        });
+/**
+ *
+ * Type: Function.
+ * Accepts: Type, Parent Id, Id.
+ * Adds document to the index.
+ *
+ */
+const indexDocument = function(id, type, parent) {
+  return new BPromise(function(resolve, reject) {
+    client.index(dummyData(id, type, parent)).then(function(result) {
+      if (result) {
+        resolve();
+      } else {
+        reject();
+      }
     });
+  });
+};
 
+/**
+ *
+ * Type: Function.
+ * Creates multiple dummy children.
+ *
+ */
+const createChildren = function() {
+  return BPromise.map(_.range(0, 8), function(id) {
+    return indexDocument(id, 'child', 1).then(refreshIndex);
+  });
+};
+
+/**
+ *
+ * Type: Object.
+ * Defines search query params.
+ *
+ */
+const searchQuery = {
+  index: indexName,
+  type: 'parent',
+  body: { query: { bool: { must: { match: { id: 1 } } } } }
+};
+
+/**
+ *
+ * Type: Function.
+ * Accepts: Error, Result.
+ * Displays the error or returns results.
+ *
+ */
+const returnInfo = function(error, result) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.dir(result[0].children);
+    return result;
+  }
+};
+
+/**
+ *
+ * Type: Function.
+ * Accepts: Result.
+ * Gets family documents.
+ *
+ */
+const getResults = function(result) {
+  let relations = {
+    index: indexName,
+    parent_type: 'parent',
+    child_type: 'child'
+  };
+  let filters = [];
+  esgetfamily(host, relations, result.hits.hits, filters, returnInfo);
+};
+
+/**
+ *
+ * Test validy of the returned
+ * information from Elasticsearch.
+ *
+ */
+describe('Testing the returned data.', function() {
+  // Create Indexes and Insert Documents.
+  before(function() {
+    return client.indices.create(esIndex).then(function() {
+      return indexDocument(1, 'parent', null).then(function() {
+        return createChildren();
+      });
+    });
+  });
+  // Search Index.
+  it('Should return parent child result', function() {
+    return client.search(searchQuery).then(getResults);
+  });
+  // Delete Index.
+  after(function() {
+    return client.indices.delete({
+      index: 'es-getfamilytest'
+    });
+  });
 });
