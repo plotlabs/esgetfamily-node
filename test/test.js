@@ -70,7 +70,6 @@ const esIndex = {
  *
  */
 const refreshIndex = function() {
-  console.log('Final Step.');
   return client.indices.refresh({
     index: indexName
   });
@@ -91,10 +90,7 @@ const dummyData = function(id, type, parent) {
     body: { id: id, age: 23, name: 'Plotlabs' + id }
   };
   if (parent) {
-    console.log('Child Created' + id);
     object.parent = parent;
-  } else {
-    console.log('Parent Created');
   }
   return object;
 };
@@ -106,8 +102,16 @@ const dummyData = function(id, type, parent) {
  * Adds document to the index.
  *
  */
-const indexDocument = function(type, parent, id) {
-  return client.index(dummyData(id, type, parent));
+const indexDocument = function(id, type, parent) {
+  return new BPromise(function(resolve, reject) {
+    client.index(dummyData(id, type, parent)).then(function(result) {
+      if (result) {
+        resolve();
+      } else {
+        reject();
+      }
+    });
+  });
 };
 
 /**
@@ -117,8 +121,9 @@ const indexDocument = function(type, parent, id) {
  *
  */
 const createChildren = function() {
-  console.log('Concieve');
-  return BPromise.map(_.range(0, 8), indexDocument.bind(this, 'child', 1));
+  return BPromise.map(_.range(0, 8), function(id) {
+    return indexDocument(id, 'child', 1).then(refreshIndex);
+  });
 };
 
 /**
@@ -175,12 +180,11 @@ const getResults = function(result) {
 describe('Testing the returned data.', function() {
   // Create Indexes and Insert Documents.
   before(function() {
-    console.log('Before');
-    return client.indices
-      .create(esIndex)
-      .then(indexDocument('parent', null, 1))
-      .then(createChildren)
-      .then(refreshIndex);
+    return client.indices.create(esIndex).then(function() {
+      return indexDocument(1, 'parent', null).then(function() {
+        return createChildren();
+      });
+    });
   });
   // Search Index.
   it('Should return parent child result', function() {
@@ -188,7 +192,6 @@ describe('Testing the returned data.', function() {
   });
   // Delete Index.
   after(function() {
-    console.log('After');
     return client.indices.delete({
       index: 'es-getfamilytest'
     });
